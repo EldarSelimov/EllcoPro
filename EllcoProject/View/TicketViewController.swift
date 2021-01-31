@@ -8,8 +8,18 @@
 import UIKit
 
 class TicketViewController: UIViewController {
+    
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     @IBOutlet weak var tableView: UITableView!
+    
+    private lazy var pageActivityIndicator: UIActivityIndicatorView = {
+        let activity = UIActivityIndicatorView(frame: CGRect(x: 0, y: 0, width: view.bounds.width, height: 50))
+        activity.hidesWhenStopped = true
+        activity.style = .medium
+        return activity
+    }()
+    
+    private let networkManager = NetworkManager.shared
     
     private var tickets: [TicketModel] = []
     
@@ -19,19 +29,26 @@ class TicketViewController: UIViewController {
         self.tableView.backgroundColor = backColor
         
         configureTableView()
-        NetworkManager.shared.getTickets(succes: { [weak self] (result) in
+        loadTickets()
+    }
+    
+    private func loadTickets() {
+        networkManager.getTickets(succes: { [weak self] (result) in
             self?.ticketLoaded(result)
+            self?.tableView.tableFooterView = nil
+            self?.pageActivityIndicator.startAnimating()
         }) { [weak self] (error) in
             let alert = UIAlertController(title: "Ошибка!", message: error, preferredStyle: .alert)
             let okAction = UIAlertAction(title: "Ok", style: .default, handler: nil)
             alert.addAction(okAction)
             self?.present(alert, animated: true, completion: nil)
-            
+            self?.tableView.tableFooterView = nil
+            self?.pageActivityIndicator.startAnimating()
         }
     }
     
     private func ticketLoaded(_ items: [TicketModel]) {
-        self.tickets = items
+        self.tickets += items
         
         activityIndicator.stopAnimating()
         tableView.isHidden = false
@@ -74,6 +91,14 @@ extension TicketViewController: UITableViewDataSource, UITableViewDelegate {
         let detailVC = storyboard.instantiateViewController(withIdentifier: "TicketDetailVC") as! SecondTableViewController
         detailVC.ticket = ticket
         navigationController?.pushViewController(detailVC, animated: true)
+    }
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        if scrollView.contentOffset.y + tableView.bounds.height >= tableView.contentSize.height - 200 && !networkManager.isLoading && !networkManager.isFinished {
+            tableView.tableFooterView = pageActivityIndicator
+            pageActivityIndicator.startAnimating()
+            loadTickets()
+        }
     }
 }
 
