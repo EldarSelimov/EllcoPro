@@ -19,7 +19,8 @@ class SecondTableViewController: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        tableView.backgroundColor = #colorLiteral(red: 0.9380168319, green: 0.7504708171, blue: 1, alpha: 1)
+        tableView.tableFooterView = UIView()
         configureTicketDetail()
     }
 

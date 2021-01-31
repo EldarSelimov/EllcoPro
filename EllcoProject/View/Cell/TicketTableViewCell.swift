@@ -25,8 +25,8 @@ class TicketTableViewCell: UITableViewCell {
         conteinerView.layer.borderColor = borderColor.cgColor
         contentView.backgroundColor = borderColor
         conteinerView.layer.shadowOffset = CGSize(width: 0, height: 5)
-        conteinerView.layer.shadowOpacity = 0.5
-        conteinerView.layer.shadowRadius = 5
+        conteinerView.layer.shadowOpacity = 0.7
+        conteinerView.layer.shadowRadius = 10
         
     }
     
